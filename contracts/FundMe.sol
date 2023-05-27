@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7; // >=0.8.7 <0.9.0   ^0.8.7
-
+//imports
 import "./PriceConverter.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+//error codes
+error FundMe_NotOwner();
+//interfaces, libraries, Contracts
 
 contract FundMe {
     using PriceConverter for uint256;
@@ -12,9 +15,8 @@ contract FundMe {
     address[] public funders;
     mapping (address => uint256) public addressToAmountFunded;
 
-    address public owner;
-
-    AggregatorV3Interface public priceFeed;
+    address public immutable owner;
+    AggregatorV3Interface public immutable priceFeed;
 
     constructor(address _priceFeed) {
         priceFeed = AggregatorV3Interface(_priceFeed);
@@ -34,7 +36,6 @@ contract FundMe {
     }
 
     function withdraw() public onlyOwner {
-
         for(uint256 funderI = 0; funderI < funders.length; funderI++) {
             address funder = funders[funderI];
             addressToAmountFunded[funder] = 0;
@@ -45,8 +46,16 @@ contract FundMe {
         require(success, "Call failed");
     }
 
+    receive() external payable {
+        fund();
+    }
+
+    fallback() external payable {
+        fund();
+    }
+
     modifier onlyOwner() {
-        require(msg.sender == owner, "func only available for owner");
+        if(msg.sender != owner) revert FundMe_NotOwner();
         _;
     }
 }

@@ -39,6 +39,8 @@ module.exports = {
           //if we have a lot of accounts we can specify  index of account we want to use for different networks
           default: 0,
           ganache: 0,
+          hardhat: 0,
+          localhost: 0,
           //(ChainId):(account index)
           //11155111: 3
       }
