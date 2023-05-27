@@ -15,13 +15,14 @@ module.exports = {
       name: 'ganache',
       url: GANACHE_URL,
       accounts: [GANACHE_KEY],
-      chainId: 1337
+      chainId: 1337,
     },
     sepolia: {
       name: "sepolia",
       url: SEPOLIA_URL,
       accounts: [SEPOLIA_KEY],
-      chainId: 11155111
+      chainId: 11155111,
+      blockConfirmations: 6,
     },
     localhost: {
       name: 'localhost',

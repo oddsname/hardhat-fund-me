@@ -1,6 +1,7 @@
 const { networkConfig, developmentChains} = require("../hepler-hardhat-config");
-
-module.exports.default = async ({ getNamedAccounts, deployments, network }) => {
+const { verify } = require("../utils/verify")
+const { deployments } = require("hardhat");
+module.exports.default = async ({ getNamedAccounts, deployments, network, ethers }) => {
     const { deploy, log } = deployments;
     const { deployer } = await getNamedAccounts();
     const chainId = network.config.chainId;
@@ -21,7 +22,13 @@ module.exports.default = async ({ getNamedAccounts, deployments, network }) => {
         from: deployer,
         args: [ethUsdPriceFeedAddress], // constructor arguments
         log: true,
+        waitConfirmations: network.config.blockConfirmations || 1,
     })
     log('FundMe deployed!')
+
+    //if it's testnet
+    if(!developmentChains.includes(network.config.name || '') && process.env.ETHERSCAN_KEY) {
+        await verify(fundMe.address, [ethUsdPriceFeedAddress]);
+    }
     log('---------------------------------------')
 }
