@@ -10,38 +10,51 @@ error FundMe__NotOwner();
 contract FundMe {
     using PriceConverter for uint256;
 
-    uint minimumUSD = 50 * 1e8;
+    uint MINIMUM_USD = 50 * 1e8;
 
-    address[] public funders;
-    mapping (address => uint256) public addressToAmountFunded;
+    address[] public s_funders;
+    mapping (address => uint256) public s_addressToAmountFunded;
 
-    address public immutable owner;
-    AggregatorV3Interface public immutable priceFeed;
+    address public immutable i_owner;
+    AggregatorV3Interface public immutable s_priceFeed;
 
     constructor(address _priceFeed) {
-        priceFeed = AggregatorV3Interface(_priceFeed);
-        owner = msg.sender;
+        s_priceFeed = AggregatorV3Interface(_priceFeed);
+        i_owner = msg.sender;
     }
 
     function fund() public payable {
-        require(msg.value.getConversionRate(priceFeed) >= minimumUSD, "You have to send at least 50 USD");
+        require(msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD, "You have to send at least 50 USD");
 
-        funders.push(msg.sender);
-        uint256 prevValue = addressToAmountFunded[msg.sender];
-        addressToAmountFunded[msg.sender] = prevValue + msg.value;
+        s_funders.push(msg.sender);
+        uint256 prevValue = s_addressToAmountFunded[msg.sender];
+        s_addressToAmountFunded[msg.sender] = prevValue + msg.value;
     }
 
     function getList() public view returns (uint256) {
-        return addressToAmountFunded[msg.sender];
+        return s_addressToAmountFunded[msg.sender];
     }
 
     function withdraw() public onlyOwner {
-        for(uint256 funderI = 0; funderI < funders.length; funderI++) {
-            address funder = funders[funderI];
-            addressToAmountFunded[funder] = 0;
+        for(uint256 funderI = 0; funderI < s_funders.length; funderI++) {
+            address funder = s_funders[funderI];
+            s_addressToAmountFunded[funder] = 0;
         }
 
-        funders = new address[](0);
+        s_funders = new address[](0);
+        (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+        require(success, "Call failed");
+    }
+
+    function cheaperWithdraw() public onlyOwner {
+        address[] memory funders = s_funders;
+        //mappings can't be in memory
+        for(uint256 funderI = 0; funderI < funders.length; funderI++) {
+            address funder = funders[funderI];
+            s_addressToAmountFunded[funder] = 0;
+        }
+
+        s_funders = new address[](0);
         (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(success, "Call failed");
     }
@@ -55,7 +68,7 @@ contract FundMe {
     }
 
     modifier onlyOwner() {
-        if(msg.sender != owner) revert FundMe__NotOwner();
+        if(msg.sender != i_owner) revert FundMe__NotOwner();
         _;
     }
 }

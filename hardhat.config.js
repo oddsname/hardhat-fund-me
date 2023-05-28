@@ -51,7 +51,7 @@ module.exports = {
     noColors: true, //because we output to a file
     currency: 'USD',
     coinmarketcap: COINMARKETCAP_KEY, // comment out if you don't need api requests
-    token: 'MATIC', //we can select different networks by specifying the currency and get actual price inside these networks
+    token: 'ETH', //we can select different networks by specifying the currency and get actual price inside these networks
   },
   solidity: "0.8.7",
   //to add multiple solidity versions
