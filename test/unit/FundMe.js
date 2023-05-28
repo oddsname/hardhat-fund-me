@@ -1,12 +1,15 @@
 const {expect, assert} = require("chai");
-const {deployments, ethers, getNamedAccounts} = require('hardhat');
+const {deployments, ethers, getNamedAccounts, network} = require('hardhat');
+const {developmentChains} = require("../../hepler-hardhat-config");
 
-describe("FundMe contract", () => {
+!developmentChains.includes(network.config.name || network.name)
+    ? describe.skip
+    : describe("FundMe contract", () => {
     let fundMe;
     let deployer;
     let mockV3aggregator;
 
-    const SEND_VALUE = ethers.utils.parseEther('1'); // 1 ETH
+    const SEND_VALUE = ethers.utils.parseEther('0.1'); // 0.2 ETH
 
     beforeEach(async () => {
         //deploy FundMe contract
@@ -17,13 +20,12 @@ describe("FundMe contract", () => {
 
         mockV3aggregator = await ethers.getContract('MockV3Aggregator', deployer);
         fundMe = await ethers.getContract('FundMe', deployer);// gets most recent deployed contract by name
-        console.log(fundMe.address, mockV3aggregator.address);
     });
 
     describe('constructor', async () => {
         it('sets the aggregator addresses correctly', async () => {
             //we get MockV3Aggregator address passed to fundMe contract and compare it with latest MockV3Aggregator we have deployed
-            const priceFeedAddress = await fundMe.s_priceFeed();
+            const priceFeedAddress = await fundMe.getPriceFeed();
             assert.equal(priceFeedAddress, mockV3aggregator.address);
         })
     });
@@ -48,7 +50,7 @@ describe("FundMe contract", () => {
 
         it('Adds funder to array of funders', async function () {
             await fundMe.fund({value: SEND_VALUE});
-            const funder = await fundMe.s_funders(0);
+            const funder = await fundMe.getFunder(0);
             assert.equal(funder, deployer);
         });
     })
@@ -104,11 +106,11 @@ describe("FundMe contract", () => {
             );
 
             //make sure that the funders are reset properly (we should clear array after withdraw function)
-            await expect(fundMe.s_funders(0)).to.be.reverted;
+            await expect(fundMe.getFunder(0)).to.be.reverted;
 
             for (let i = 1; i < accounts.length; i++) {
                 //check if we clear contract's mapper properly
-                assert.equal(await fundMe.s_addressToAmountFunded(accounts[i].address), 0);
+                assert.equal(await fundMe.getAmountFunded(accounts[i].address), 0);
             }
         });
 
@@ -147,11 +149,11 @@ describe("FundMe contract", () => {
             );
 
             //make sure that the funders are reset properly (we should clear array after withdraw function)
-            await expect(fundMe.s_funders(0)).to.be.reverted;
+            await expect(fundMe.getFunder(0)).to.be.reverted;
 
             for (let i = 1; i < accounts.length; i++) {
                 //check if we clear contract's mapper properly
-                assert.equal(await fundMe.s_addressToAmountFunded(accounts[i].address), 0);
+                assert.equal(await fundMe.getAmountFunded(accounts[i].address), 0);
             }
         });
 

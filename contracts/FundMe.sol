@@ -10,17 +10,33 @@ error FundMe__NotOwner();
 contract FundMe {
     using PriceConverter for uint256;
 
-    uint MINIMUM_USD = 50 * 1e8;
+    uint256 public constant MINIMUM_USD = 50 * 1e8;
 
-    address[] public s_funders;
-    mapping (address => uint256) public s_addressToAmountFunded;
+    address[] private s_funders;
+    mapping (address => uint256) private s_addressToAmountFunded;
 
-    address public immutable i_owner;
-    AggregatorV3Interface public immutable s_priceFeed;
+    address private immutable i_owner;
+    AggregatorV3Interface private immutable s_priceFeed;
 
     constructor(address _priceFeed) {
         s_priceFeed = AggregatorV3Interface(_priceFeed);
         i_owner = msg.sender;
+    }
+
+    function getOwner() public view returns(address) {
+        return i_owner;
+    }
+
+    function getFunder(uint256 index) public view returns(address) {
+        return s_funders[index];
+    }
+
+    function getAmountFunded(address adr) public view returns(uint256) {
+        return s_addressToAmountFunded[adr];
+    }
+
+    function getPriceFeed() public view returns(AggregatorV3Interface) {
+        return s_priceFeed;
     }
 
     function fund() public payable {
