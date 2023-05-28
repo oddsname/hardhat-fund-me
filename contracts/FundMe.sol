@@ -4,7 +4,7 @@ pragma solidity ^0.8.7; // >=0.8.7 <0.9.0   ^0.8.7
 import "./PriceConverter.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 //error codes
-error FundMe_NotOwner();
+error FundMe__NotOwner();
 //interfaces, libraries, Contracts
 
 contract FundMe {
@@ -55,7 +55,7 @@ contract FundMe {
     }
 
     modifier onlyOwner() {
-        if(msg.sender != owner) revert FundMe_NotOwner();
+        if(msg.sender != owner) revert FundMe__NotOwner();
         _;
     }
 }
