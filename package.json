@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "solhint 'contracts/*.sol'",
+    "lint:fix": "solhint 'contracts/*.sol' --fix",
+    "format": "prettier --write .",
+    "coverage": "hardhat coverage"
   },
   "author": "",
   "license": "ISC",
