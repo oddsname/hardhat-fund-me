@@ -3,6 +3,7 @@ pragma solidity ^0.8.7; // >=0.8.7 <0.9.0   ^0.8.7
 //imports
 import "./PriceConverter.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "hardhat/console.sol";
 //error codes
 error FundMe__NotOwner();
 //interfaces, libraries, Contracts
